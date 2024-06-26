@@ -1,0 +1,47 @@
+<div class="container">
+  <h1 class="my-playlist">My Playlist</h1>
+  <div id="layout-row" class="row"></div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    const playlistContainer = document.getElementById('layout-row');
+
+    try {
+      const response = await fetch('/api/playlist_tracks');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const playlistTracks = await response.json();
+
+      playlistTracks.forEach(track => {
+        const trackHTML = `
+          <div class="col-5 col-sm-4 col-md-3 col-lg-3 mt-5 mb-2 pr-2">
+            <div class="card">
+              <span class="song">
+                <div class="image-overlay">
+                  <img class="card-img-top" src="${track.cover_image_url}" alt="Card image cap">
+                  <form action="/playlist_tracks/delete" method="POST">
+                    <input type="hidden" name="trackId" value="${track.track_id}">
+                    <button type="submit" class="bi bi-x-circle-fill icon"></button>
+                  </form>
+                </div>
+                <div class="overlay" data-album-image="${track.cover_image_url}" data-song-name="${track.track_name}">
+                  <h5 class="album-name pt-4 pb-2">
+                    <strong>${track.track_name}</strong><br>
+                    <span class="artist-name">${track.artist}</span>
+                  </h5>
+                </div>
+              </span>
+            </div>
+          </div>
+        `;
+
+        playlistContainer.insertAdjacentHTML('beforeend', trackHTML);
+      });
+    } catch (error) {
+      console.error('Error fetching playlist tracks:', error);
+    }
+  });
+</script>

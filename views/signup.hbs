@@ -1,0 +1,57 @@
+<link rel="stylesheet" type="text/css" href="/login.css">
+<div class="wrapper">
+    <div class="login-text">
+        <button class="cta"><i class="bi bi-chevron-compact-down"></i></button>
+        <div class="text">
+            <form action="/authentication/signup" method="POST">
+                <h1>Register</h1>
+                <hr>
+                <br>
+                <input type="text" class="form-control" id="name" name="username" placeholder="Username">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                <input type="password" class="form-control" id="confirm_password" name="passwordConfirm" placeholder="Password">
+                <button type="submit" class="signup-btn">Sign Up</button>
+                <p>Have an Account?<a href="/authentication/login">Login Here!</a></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="call-text">
+        <h1><span>Join</span><br>the community</h1>
+    </div>
+
+</div>
+
+
+<script>
+  var password = document.getElementById("password")
+  , confirm_password = document.getElementById("confirm_password");
+  function validatePassword(){
+    if(password.value != confirm_password.value) {
+      confirm_password.setCustomValidity("Passwords Don't Match");
+    } else {
+      confirm_password.setCustomValidity('');
+    }
+  }
+  password.onchange = validatePassword;
+  confirm_password.onkeyup = validatePassword;
+
+
+var cta = document.querySelector(".cta");
+var check = 0;
+cta.addEventListener('click', function(e){
+    var text = e.target.nextElementSibling;
+    var loginText = e.target.parentElement;
+    text.classList.toggle('show-hide');
+    loginText.classList.toggle('expand');
+    if(check == 0) {
+        cta.innerHTML ="<i class=\"bi bi-chevron-compact-up\"></i>";
+        check++;
+    }
+    else {
+        cta.innerHTML ="<i class=\"bi bi-chevron-compact-down\"></i>";
+        check = 0;
+    }
+})
+</script>

@@ -1,0 +1,34 @@
+<div class="container">
+  <h2>User Information</h2>
+  <p>Id: {{user.id}}</p>
+  <p>Username: {{user.username}}</p>
+  <p>Email: {{user.email}}</p>
+
+  <h2>Playlist Tracks</h2>
+  <table class="table table-striped">  <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">COVER IMAGE</th>
+        <th scope="col">ARTIST</th>
+        <th scope="col">TRACK NAME</th>
+        <th scope="col">ACTION</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each tracks}}
+        <tr>
+          <td>{{@index}}</td>
+          <td><img src="{{this.cover_image_url}}" width="70px"></td>
+          <td>{{this.artist}}</td>
+          <td>{{this.track_name}}</td>
+          <td>
+            <form action="/admin/dashboard_admin/user/{{this.user_id}}/delete_track/{{this.id}}" method="POST">
+              <input type="hidden" name="trackId" value="{{this.id}}">
+              <button type="submit" class="btn btn-danger">DELETE</button>
+            </form>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

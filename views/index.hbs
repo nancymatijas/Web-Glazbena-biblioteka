@@ -1,0 +1,129 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="input-group">
+        <input type="text" id="searchQuery" class="form-control" placeholder="Search for songs...">
+        <div class="input-group-prepend"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-5" id="results"></div>
+</div>
+
+<div class="container">
+  <div id="layout-row" class="row"></div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    const albumContainer = document.getElementById('layout-row');
+
+    try {
+      const response = await fetch('/api/albums');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const albums = await response.json();
+
+      albums.forEach(album => {
+        const imageUrl = album.imageUrl || 'placeholder.jpg';
+
+        const albumHTML = `
+          <div class="col-5 col-sm-4 col-md-3 col-lg-3 mt-5 mb-2 pr-2">
+            <div class="card">
+              <a href="/album/${album.id}">
+                <div class="image-overlay">
+                  <img class="card-img-top" src="${imageUrl}" alt="Album image">
+                </div>
+                <div class="overlay" data-album-image="${imageUrl}" data-song-name="${album.name}">
+                  <h5 class="album-name pt-4 pb-2">
+                    <strong>${album.name}</strong><br>
+                    <span class="artist-name">${album.artists[0].name}</span>
+                  </h5>
+                </div>
+              </a>
+            </div>
+          </div>
+        `;
+
+        albumContainer.insertAdjacentHTML('beforeend', albumHTML);
+      });
+    } catch (error) {
+      console.error('Error fetching albums:', error);
+    }
+  });
+
+  async function searchSongs() {
+    const query = document.getElementById('searchQuery').value.trim(); 
+    const resultsContainer = document.getElementById('results');
+
+    if (!query) {
+      resultsContainer.innerHTML = '';
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const tracks = await response.json();
+
+      resultsContainer.innerHTML = '';
+
+      if (tracks.error) {
+        resultsContainer.innerHTML = `<p>Error: ${tracks.error}</p>`;
+        return;
+      }
+
+  tracks.forEach(track => {
+    const trackElement = document.createElement('div');
+    trackElement.classList.add('col-sm-6', 'col-md-4', 'col-lg-3', 'mb-4'); 
+    trackElement.innerHTML = `
+      <div class="card">
+        <span class="song">
+          <div class="image-overlay">
+            <img class="card-img-top" src="${track.imageUrl}" alt="Track image">
+            <button class="bi bi-plus-circle-fill icon add-to-playlist-btn" onclick="addToPlaylist('${track.id}')"></button>
+          </div>
+          <div class="overlay" data-album-image="${track.imageUrl}" data-song-name="${track.name}">
+            <h5 class="album-name pt-4 pb-2">
+              <strong>${track.name}</strong><br>
+              <span class="artist-name">${track.artists[0].name}</span>
+            </h5>
+          </div>
+        </span>
+      </div>
+    `;
+    resultsContainer.appendChild(trackElement);
+  });
+    } catch (error) {
+      console.error('Error searching songs:', error);
+    }
+  }
+
+  async function addToPlaylist(trackId) {
+    try {
+      const response = await fetch('/playlist_tracks/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trackId })
+      });
+
+      if (response.ok) {
+        window.location.href = '/playlist_tracks';
+      } else if (response.status === 401) {
+        window.location.href = '/authentication/login';
+      } else {
+        const errorData = await response.text();
+        alert(`Error: ${errorData}`);
+      }
+    } catch (error) {
+      console.error('Error adding to playlist:', error);
+    }
+  }
+
+  document.getElementById('searchQuery').addEventListener('input', function() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(searchSongs, 500); 
+  });
+</script>
